@@ -6,33 +6,128 @@ import subprocess
 import shutil
 import argparse
 
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+try:
+    from openclaw_adapter import openclaw_run
+except ImportError:
+    # Fallback if openclaw_adapter is not yet available
+    def openclaw_run(data):
+        return {"error": "openclaw_adapter module not found", "data": data}
+
 # Import the two detection engines we built
 from scanner import scan_code
 from dependency_scanner import scan_package_json, scan_requirements_txt
 
-def clone_repository(repo_url: str, dest_dir: str) -> bool:
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "API running"})
+
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    data = request.json
+    code = data.get("code", "")
+    repo_url = data.get("repo_url", "")
+
+    if not code and not repo_url:
+        return jsonify({"error": "No code or repository URL provided"}), 400
+
+    try:
+        final_results = []
+
+        if code:
+            # Step 1: scan code
+            scan_results = scan_code(code)
+            if not scan_results:
+                return jsonify({
+                    "status": "no_issues",
+                    "message": "No deprecated APIs found"
+                })
+            
+            # For direct code input, we still take the first issue for AI result if needed,
+            # but we return the whole scan for the dashboard.
+            final_results = scan_results
+            
+            # Step 3: AI agent for the first result (legacy compatibility)
+            # You can expand this to loop through results if you want AI for all
+            detection = scan_results[0]
+            input_data = {
+                "old_usage": detection.get("old_usage", "unknown"),
+                "new_api": detection.get("new_api", "unknown"),
+                "reason": detection.get("reason", "Not specified"),
+                "code_snippet": code
+            }
+            ai_result = openclaw_run(input_data)
+            
+            return jsonify({
+                "status": "success",
+                "scan_result": detection, # Legacy single result for older UI parts
+                "all_results": final_results, # Full list for the new dashboard
+                "ai_result": ai_result
+            })
+
+        elif repo_url:
+            # Handle Repository Scanning
+            temp_dir = tempfile.mkdtemp(prefix="debtmap_api_")
+            try:
+                success, error_msg = clone_repository(repo_url, temp_dir)
+                if success:
+                    final_results = scan_directory(temp_dir, False) # auto_fix=False for API
+                    
+                    if not final_results:
+                         return jsonify({
+                            "status": "no_issues",
+                            "message": "No issues found in this repository."
+                        })
+                        
+                    return jsonify({
+                        "status": "success",
+                        "all_results": final_results,
+                        "repo_mode": True
+                    })
+                else:
+                    return jsonify({"status": "error", "message": f"Clone Error: {error_msg}"}), 500
+            finally:
+                shutil.rmtree(temp_dir, ignore_errors=True)
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
+def clone_repository(repo_url: str, dest_dir: str):
     """Clones a git repository into the specified directory."""
     print(f"[*] Cloning {repo_url} into {dest_dir}...")
     try:
-        subprocess.run(
-            ["git", "clone", repo_url, dest_dir],
+        result = subprocess.run(
+            ["git", "clone", "--depth", "1", repo_url, dest_dir],
             check=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            text=True
         )
-        return True
+        print(f"[*] Clone successful. Directory contents: {os.listdir(dest_dir)}")
+        return True, ""
     except subprocess.CalledProcessError as e:
-        print(f"[!] Failed to clone repository: {e}")
-        return False
+        error_msg = e.stderr if e.stderr else str(e)
+        print(f"[!] Failed to clone repository: {error_msg}")
+        return False, error_msg
     except FileNotFoundError:
-        print("[!] Git is not installed or not in PATH.")
-        return False
+        error_msg = "Git is not installed or not in the system PATH."
+        print(f"[!] {error_msg}")
+        return False, error_msg
 
 def scan_directory(directory: str, auto_fix: bool = False) -> list:
     """Walks through a directory, reads files, and passes them to the detection engines."""
     all_findings = []
     print(f"[*] Scanning directory: {directory}")
     
+    file_count = 0
     for root, _, files in os.walk(directory):
         # Skip git metadata folders to speed up processing
         if '.git' in root:
@@ -42,6 +137,10 @@ def scan_directory(directory: str, auto_fix: bool = False) -> list:
             file_path = os.path.join(root, file)
             # Create a clean relative path to display in the final JSON
             rel_path = os.path.relpath(file_path, directory)
+            
+            # Debug: print every file we look at
+            print(f"[*] Checking file: {rel_path}")
+            file_count += 1
             
             try:
                 # 1. Route Dependency Files to the Dependency Scanner
@@ -88,19 +187,30 @@ def scan_directory(directory: str, auto_fix: bool = False) -> list:
 
                     for r in results:
                         r["file"] = rel_path
+                        r["full_content"] = content
                         all_findings.append(r)
                             
             except Exception:
                 # Silently ignore files that can't be read (e.g. binary files with .js extensions, weird encodings)
                 pass
                 
+    print(f"[*] Finished scan. Total files checked: {file_count}")
     return all_findings
 
 def main():
     parser = argparse.ArgumentParser(description="DebtMap Detection Engine Controller")
-    parser.add_argument("target", help="GitHub repository URL (https://...) OR a local directory path")
+    # Make target optional by using nargs="?"
+    parser.add_argument("target", nargs="?", help="GitHub repository URL (https://...) OR a local directory path. Omit to run the API server.")
     parser.add_argument("--fix", action="store_true", help="Automatically apply suggested code replacements where possible")
+    parser.add_argument("--serve", action="store_true", help="Run the Flask API server")
+    parser.add_argument("--port", type=int, default=5000, help="Port to run the API server on")
     args = parser.parse_args()
+
+    # If --serve is passed or no target is provided, we run the Flask server
+    if args.serve or not args.target:
+        print(f"[*] Starting API server on port {args.port}...")
+        app.run(debug=True, port=args.port)
+        return
 
     target = args.target
     is_url = target.startswith("http://") or target.startswith("https://")
@@ -122,9 +232,6 @@ def main():
         if os.path.isdir(target):
             final_results = scan_directory(target, args.fix)
         elif os.path.isfile(target):
-            # Create a temporary directory to use scan_directory logic, or handle file directly
-            # For simplicity, we can just run scan_directory on the parent folder but ONLY process this file.
-            # Actually, it's simpler to just copy the file logic here:
             file_path = target
             rel_path = os.path.basename(file_path)
             

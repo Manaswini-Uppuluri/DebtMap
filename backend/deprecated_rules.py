@@ -108,5 +108,38 @@ DEPRECATED_RULES = [
         "manual_steps": "1. Replace window.showModalDialog with the HTML <dialog> element or a custom UI modal component.\n2. Refactor the synchronous code to handle the asynchronous nature of modern modals (using callbacks or Promises).",
         "effort": "high",
         "cost_per_occurrence": 40
+    },
+    {
+        "api_name": "openai.Completion.create",
+        "language": "python",
+        "pattern": r"\bopenai\.Completion\.create\s*\(",
+        "replace_pattern": r"client.chat.completions.create(",
+        "reason": "Deprecated in OpenAI v1.0.0.",
+        "replacement": "client.chat.completions.create",
+        "manual_steps": "1. Instantiate the OpenAI client: `from openai import OpenAI\nclient = OpenAI()`.\n2. Replace `openai.Completion.create` with `client.chat.completions.create`.\n3. Note that the response object has changed structure, access `.message.content` instead of `.text`.",
+        "effort": "medium",
+        "cost_per_occurrence": 20
+    },
+    {
+        "api_name": "xrange()",
+        "language": "python",
+        "pattern": r"\bxrange\s*\(",
+        "replace_pattern": r"range(",
+        "reason": "Deprecated in Python 3; use range() instead.",
+        "replacement": "range()",
+        "manual_steps": "1. Replace all occurrences of xrange() with range(). In Python 3, range() behaves like Python 2's xrange().",
+        "effort": "low",
+        "cost_per_occurrence": 5
+    },
+    {
+        "api_name": "raw_input()",
+        "language": "python",
+        "pattern": r"\braw_input\s*\(",
+        "replace_pattern": r"input(",
+        "reason": "Deprecated in Python 3; use input() instead.",
+        "replacement": "input()",
+        "manual_steps": "1. Replace all occurrences of raw_input() with input().",
+        "effort": "low",
+        "cost_per_occurrence": 5
     }
 ]
