@@ -1,25 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DebtMap — AI-Powered Migration Advisor for Deprecated APIs</title>
-  <meta name="description" content="DebtMap scans GitHub repositories, detects outdated APIs, and generates migration-ready fixes with AI. Migrate deprecated APIs before they break production." />
+  <meta name="description"
+    content="DebtMap scans GitHub repositories, detects outdated APIs, and generates migration-ready fixes with AI. Migrate deprecated APIs before they break production." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <!-- NAV -->
   <nav id="main-nav" class="nav">
     <div class="nav-inner">
       <a href="#" class="nav-logo" id="nav-logo">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="url(#logo-grad)" stroke-width="1.5" fill="none"/>
-          <path d="M2 17l10 5 10-5" stroke="url(#logo-grad)" stroke-width="1.5" fill="none"/>
-          <path d="M2 12l10 5 10-5" stroke="url(#logo-grad)" stroke-width="1.5" fill="none"/>
-          <defs><linearGradient id="logo-grad" x1="2" y1="2" x2="22" y2="22"><stop stop-color="#58a6ff"/><stop offset="1" stop-color="#3fb950"/></linearGradient></defs>
+          <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="url(#logo-grad)" stroke-width="1.5" fill="none" />
+          <path d="M2 17l10 5 10-5" stroke="url(#logo-grad)" stroke-width="1.5" fill="none" />
+          <path d="M2 12l10 5 10-5" stroke="url(#logo-grad)" stroke-width="1.5" fill="none" />
+          <defs>
+            <linearGradient id="logo-grad" x1="2" y1="2" x2="22" y2="22">
+              <stop stop-color="#58a6ff" />
+              <stop offset="1" stop-color="#3fb950" />
+            </linearGradient>
+          </defs>
         </svg>
         <span>DebtMap</span>
       </a>
@@ -37,11 +47,14 @@
     <div class="hero-inner">
       <div class="hero-left">
         <div class="hero-badge" id="hero-badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
           AI-Powered Developer Tool
         </div>
         <h1 class="hero-heading" id="hero-heading">
-          Migrate deprecated APIs<br/>
+          Migrate deprecated APIs<br />
           <span class="hero-heading-accent">before they break production</span>
         </h1>
         <p class="hero-sub" id="hero-sub">
@@ -49,16 +62,23 @@
         </p>
         <div class="hero-ctas" id="hero-ctas">
           <a href="#" class="btn btn-primary" id="cta-analyze">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
             Analyze Repository
           </a>
           <a href="#migration-preview" class="btn btn-secondary" id="cta-demo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
             View Demo
           </a>
         </div>
         <p class="hero-trust" id="hero-trust">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
           Built for developers maintaining evolving codebases
         </p>
       </div>
@@ -71,7 +91,9 @@
               <code>openai.Completion.create()</code>
             </div>
             <div class="viz-arrow" id="viz-arrow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M19 12l-7 7-7-7" />
+              </svg>
             </div>
             <div class="viz-label viz-label-new" id="viz-label-new">
               <span class="viz-status viz-status-updated">UPDATED</span>
@@ -80,15 +102,24 @@
           </div>
           <!-- Floating indicators -->
           <div class="viz-indicator viz-indicator-1" id="viz-ind-1">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
             <span>Scanning repository…</span>
           </div>
           <div class="viz-indicator viz-indicator-2" id="viz-ind-2">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4" />
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            </svg>
             <span>3 deprecated APIs found</span>
           </div>
           <div class="viz-indicator viz-indicator-3" id="viz-ind-3">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
             <span>Migration plan ready</span>
           </div>
         </div>
@@ -110,11 +141,13 @@
           <div class="step-number">01</div>
           <div class="step-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/>
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
             </svg>
           </div>
           <h3 class="step-title">Paste GitHub Repository</h3>
-          <p class="step-desc">Drop in a repository URL. DebtMap clones and indexes every file, function, and import across your codebase.</p>
+          <p class="step-desc">Drop in a repository URL. DebtMap clones and indexes every file, function, and import
+            across your codebase.</p>
           <div class="step-terminal">
             <code>https://github.com/acme/api-service</code>
           </div>
@@ -124,12 +157,14 @@
           <div class="step-number">02</div>
           <div class="step-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-              <path d="M11 8v6M8 11h6"/>
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+              <path d="M11 8v6M8 11h6" />
             </svg>
           </div>
           <h3 class="step-title">AI Detects Deprecated APIs</h3>
-          <p class="step-desc">Our engine cross-references your code against known deprecation databases—flagging outdated calls, risky patterns, and EOL dependencies.</p>
+          <p class="step-desc">Our engine cross-references your code against known deprecation databases—flagging
+            outdated calls, risky patterns, and EOL dependencies.</p>
           <div class="step-terminal">
             <code><span class="t-warn">⚠</span> openai.Completion.create() — <span class="t-muted">deprecated v1.0</span></code>
           </div>
@@ -139,15 +174,16 @@
           <div class="step-number">03</div>
           <div class="step-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
             </svg>
           </div>
           <h3 class="step-title">Generate Migration Guidance</h3>
-          <p class="step-desc">DebtMap produces drop-in replacement code, migration guides, and before/after diffs — ready to ship as a pull request.</p>
+          <p class="step-desc">DebtMap produces drop-in replacement code, migration guides, and before/after diffs —
+            ready to ship as a pull request.</p>
           <div class="step-terminal">
             <code><span class="t-ok">✓</span> Migration plan generated — <span class="t-muted">3 files, 12 changes</span></code>
           </div>
@@ -166,19 +202,21 @@
       <div class="section-header">
         <span class="section-label" id="features-label">Capabilities</span>
         <h2 class="section-title" id="features-title">Built for modern engineering teams</h2>
-        <p class="section-desc" id="features-desc">Everything you need to keep your codebase current, secure, and maintainable.</p>
+        <p class="section-desc" id="features-desc">Everything you need to keep your codebase current, secure, and
+          maintainable.</p>
       </div>
       <div class="features-grid" id="features-grid">
         <!-- Feature 1 -->
         <div class="feature-card" id="feature-1">
           <div class="feature-icon feature-icon-1">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z"/>
-              <circle cx="12" cy="9" r="2.5"/>
+              <path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z" />
+              <circle cx="12" cy="9" r="2.5" />
             </svg>
           </div>
           <h3 class="feature-title">AI Migration Guidance</h3>
-          <p class="feature-desc">Context-aware migration suggestions powered by LLMs. Each fix accounts for your specific codebase patterns and dependencies.</p>
+          <p class="feature-desc">Context-aware migration suggestions powered by LLMs. Each fix accounts for your
+            specific codebase patterns and dependencies.</p>
           <div class="feature-code">
             <div class="feature-code-header">
               <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
@@ -193,12 +231,13 @@
         <div class="feature-card" id="feature-2">
           <div class="feature-icon feature-icon-2">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v4M12 16h.01"/>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4M12 16h.01" />
             </svg>
           </div>
           <h3 class="feature-title">Deprecated API Detection</h3>
-          <p class="feature-desc">Continuously updated deprecation database covering major SDKs, frameworks, and libraries. Catches what linters miss.</p>
+          <p class="feature-desc">Continuously updated deprecation database covering major SDKs, frameworks, and
+            libraries. Catches what linters miss.</p>
           <div class="feature-code">
             <div class="feature-code-header">
               <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
@@ -215,11 +254,12 @@
         <div class="feature-card" id="feature-3">
           <div class="feature-icon feature-icon-3">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
           <h3 class="feature-title">Security Risk Alerts</h3>
-          <p class="feature-desc">Deprecated APIs often carry known CVEs. DebtMap surfaces exploitable vulnerabilities tied to outdated code paths.</p>
+          <p class="feature-desc">Deprecated APIs often carry known CVEs. DebtMap surfaces exploitable vulnerabilities
+            tied to outdated code paths.</p>
           <div class="feature-code">
             <div class="feature-code-header">
               <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
@@ -234,11 +274,13 @@
         <div class="feature-card" id="feature-4">
           <div class="feature-icon feature-icon-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/>
+              <path d="M16 18l6-6-6-6" />
+              <path d="M8 6l-6 6 6 6" />
             </svg>
           </div>
           <h3 class="feature-title">Before / After Code Diffs</h3>
-          <p class="feature-desc">Visual side-by-side diffs for every migration. Review exact changes before committing — no guesswork, no surprises.</p>
+          <p class="feature-desc">Visual side-by-side diffs for every migration. Review exact changes before committing
+            — no guesswork, no surprises.</p>
           <div class="feature-code">
             <div class="feature-code-header">
               <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
@@ -262,36 +304,49 @@
       <div class="section-header">
         <span class="section-label" id="preview-label">Live Preview</span>
         <h2 class="section-title" id="preview-title">See the migration in action</h2>
-        <p class="section-desc" id="preview-desc">DebtMap rewrites deprecated calls with drop-in replacements. Here's a real example.</p>
+        <p class="section-desc" id="preview-desc">DebtMap rewrites deprecated calls with drop-in replacements. Here's a
+          real example.</p>
       </div>
       <div class="preview-container" id="preview-container">
         <div class="preview-pane preview-before" id="preview-before">
           <div class="preview-header">
             <div class="preview-dots"><span></span><span></span><span></span></div>
             <span class="preview-tab preview-tab-old">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M15 9l-6 6M9 9l6 6" />
+              </svg>
               before — legacy_client.py
             </span>
           </div>
           <div class="preview-code">
             <div class="code-line"><span class="line-no">1</span><span class="kw">import</span> openai</div>
             <div class="code-line"><span class="line-no">2</span></div>
-            <div class="code-line"><span class="line-no">3</span>openai.api_key = <span class="str">"sk-..."</span></div>
+            <div class="code-line"><span class="line-no">3</span>openai.api_key = <span class="str">"sk-..."</span>
+            </div>
             <div class="code-line"><span class="line-no">4</span></div>
-            <div class="code-line code-line-removed"><span class="line-no">5</span>response = openai.<span class="dep">Completion</span>.<span class="dep">create</span>(</div>
-            <div class="code-line code-line-removed"><span class="line-no">6</span>    model=<span class="str">"text-davinci-003"</span>,</div>
-            <div class="code-line code-line-removed"><span class="line-no">7</span>    prompt=<span class="str">"Summarize this text:"</span>,</div>
-            <div class="code-line code-line-removed"><span class="line-no">8</span>    max_tokens=<span class="num">150</span>,</div>
-            <div class="code-line code-line-removed"><span class="line-no">9</span>    temperature=<span class="num">0.7</span></div>
+            <div class="code-line code-line-removed"><span class="line-no">5</span>response = openai.<span
+                class="dep">Completion</span>.<span class="dep">create</span>(</div>
+            <div class="code-line code-line-removed"><span class="line-no">6</span> model=<span
+                class="str">"text-davinci-003"</span>,</div>
+            <div class="code-line code-line-removed"><span class="line-no">7</span> prompt=<span class="str">"Summarize
+                this text:"</span>,</div>
+            <div class="code-line code-line-removed"><span class="line-no">8</span> max_tokens=<span
+                class="num">150</span>,</div>
+            <div class="code-line code-line-removed"><span class="line-no">9</span> temperature=<span
+                class="num">0.7</span></div>
             <div class="code-line code-line-removed"><span class="line-no">10</span>)</div>
             <div class="code-line"><span class="line-no">11</span></div>
-            <div class="code-line code-line-removed"><span class="line-no">12</span><span class="kw">print</span>(response.choices[<span class="num">0</span>].text)</div>
+            <div class="code-line code-line-removed"><span class="line-no">12</span><span
+                class="kw">print</span>(response.choices[<span class="num">0</span>].text)</div>
           </div>
         </div>
         <div class="preview-divider" id="preview-divider">
           <div class="divider-line"></div>
           <div class="divider-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </div>
           <div class="divider-line"></div>
         </div>
@@ -299,40 +354,61 @@
           <div class="preview-header">
             <div class="preview-dots"><span></span><span></span><span></span></div>
             <span class="preview-tab preview-tab-new">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
               after — modern_client.py
             </span>
           </div>
           <div class="preview-code">
-            <div class="code-line code-line-added"><span class="line-no">1</span><span class="kw">from</span> openai <span class="kw">import</span> OpenAI</div>
+            <div class="code-line code-line-added"><span class="line-no">1</span><span class="kw">from</span> openai
+              <span class="kw">import</span> OpenAI</div>
             <div class="code-line"><span class="line-no">2</span></div>
-            <div class="code-line code-line-added"><span class="line-no">3</span>client = OpenAI(api_key=<span class="str">"sk-..."</span>)</div>
+            <div class="code-line code-line-added"><span class="line-no">3</span>client = OpenAI(api_key=<span
+                class="str">"sk-..."</span>)</div>
             <div class="code-line"><span class="line-no">4</span></div>
-            <div class="code-line code-line-added"><span class="line-no">5</span>response = client.<span class="ok">chat</span>.<span class="ok">completions</span>.<span class="ok">create</span>(</div>
-            <div class="code-line code-line-added"><span class="line-no">6</span>    model=<span class="str">"gpt-4o"</span>,</div>
-            <div class="code-line code-line-added"><span class="line-no">7</span>    messages=[{</div>
-            <div class="code-line code-line-added"><span class="line-no">8</span>        <span class="str">"role"</span>: <span class="str">"user"</span>,</div>
-            <div class="code-line code-line-added"><span class="line-no">9</span>        <span class="str">"content"</span>: <span class="str">"Summarize this text:"</span></div>
-            <div class="code-line code-line-added"><span class="line-no">10</span>    }],</div>
-            <div class="code-line code-line-added"><span class="line-no">11</span>    max_tokens=<span class="num">150</span>,</div>
-            <div class="code-line code-line-added"><span class="line-no">12</span>    temperature=<span class="num">0.7</span></div>
+            <div class="code-line code-line-added"><span class="line-no">5</span>response = client.<span
+                class="ok">chat</span>.<span class="ok">completions</span>.<span class="ok">create</span>(</div>
+            <div class="code-line code-line-added"><span class="line-no">6</span> model=<span
+                class="str">"gpt-4o"</span>,</div>
+            <div class="code-line code-line-added"><span class="line-no">7</span> messages=[{</div>
+            <div class="code-line code-line-added"><span class="line-no">8</span> <span class="str">"role"</span>: <span
+                class="str">"user"</span>,</div>
+            <div class="code-line code-line-added"><span class="line-no">9</span> <span class="str">"content"</span>:
+              <span class="str">"Summarize this text:"</span></div>
+            <div class="code-line code-line-added"><span class="line-no">10</span> }],</div>
+            <div class="code-line code-line-added"><span class="line-no">11</span> max_tokens=<span
+                class="num">150</span>,</div>
+            <div class="code-line code-line-added"><span class="line-no">12</span> temperature=<span
+                class="num">0.7</span></div>
             <div class="code-line code-line-added"><span class="line-no">13</span>)</div>
             <div class="code-line"><span class="line-no">14</span></div>
-            <div class="code-line code-line-added"><span class="line-no">15</span><span class="kw">print</span>(response.choices[<span class="num">0</span>].message.content)</div>
+            <div class="code-line code-line-added"><span class="line-no">15</span><span
+                class="kw">print</span>(response.choices[<span class="num">0</span>].message.content)</div>
           </div>
         </div>
       </div>
       <div class="preview-meta" id="preview-meta">
         <div class="meta-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
           Generated in 1.2s
         </div>
         <div class="meta-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
           1 file changed
         </div>
         <div class="meta-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
           100% compatible
         </div>
       </div>
@@ -344,9 +420,13 @@
     <div class="section-inner">
       <div class="cta-box" id="cta-box">
         <h2 class="cta-heading" id="cta-heading">Stop firefighting deprecated APIs.</h2>
-        <p class="cta-desc" id="cta-desc">Let DebtMap scan your repositories and generate migration-ready fixes — so your team ships features, not patches.</p>
+        <p class="cta-desc" id="cta-desc">Let DebtMap scan your repositories and generate migration-ready fixes — so
+          your team ships features, not patches.</p>
         <a href="#" class="btn btn-primary btn-lg" id="cta-final">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
           Analyze Your Repository
         </a>
         <p class="cta-fine">Free for open-source projects. No credit card required.</p>
@@ -360,10 +440,15 @@
       <div class="footer-left">
         <a href="#" class="nav-logo">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="url(#logo-grad2)" stroke-width="1.5" fill="none"/>
-            <path d="M2 17l10 5 10-5" stroke="url(#logo-grad2)" stroke-width="1.5" fill="none"/>
-            <path d="M2 12l10 5 10-5" stroke="url(#logo-grad2)" stroke-width="1.5" fill="none"/>
-            <defs><linearGradient id="logo-grad2" x1="2" y1="2" x2="22" y2="22"><stop stop-color="#58a6ff"/><stop offset="1" stop-color="#3fb950"/></linearGradient></defs>
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="url(#logo-grad2)" stroke-width="1.5" fill="none" />
+            <path d="M2 17l10 5 10-5" stroke="url(#logo-grad2)" stroke-width="1.5" fill="none" />
+            <path d="M2 12l10 5 10-5" stroke="url(#logo-grad2)" stroke-width="1.5" fill="none" />
+            <defs>
+              <linearGradient id="logo-grad2" x1="2" y1="2" x2="22" y2="22">
+                <stop stop-color="#58a6ff" />
+                <stop offset="1" stop-color="#3fb950" />
+              </linearGradient>
+            </defs>
           </svg>
           <span>DebtMap</span>
         </a>
@@ -378,6 +463,89 @@
     </div>
   </footer>
 
+  <!-- ANALYZE MODAL (Dashboard Overlay) -->
+  <div id="analyze-modal" class="modal">
+    <div class="modal-content dashboard-modal">
+      <div class="dashboard-header">
+        <div class="nav-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="url(#logo-grad3)" stroke-width="1.5" fill="none" />
+            <path d="M2 17l10 5 10-5" stroke="url(#logo-grad3)" stroke-width="1.5" fill="none" />
+            <path d="M2 12l10 5 10-5" stroke="url(#logo-grad3)" stroke-width="1.5" fill="none" />
+            <defs>
+              <linearGradient id="logo-grad3" x1="2" y1="2" x2="22" y2="22">
+                <stop stop-color="#58a6ff" />
+                <stop offset="1" stop-color="#3fb950" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>DebtMap AI Advisor</span>
+        </div>
+        <span class="modal-close" id="modal-close">&times;</span>
+      </div>
+
+      <div class="dashboard-body">
+        <!-- Left Side: Source -->
+        <div class="dashboard-pane dashboard-left" style="flex: 1.2;">
+          <div class="pane-header">
+            <h3>Terminal</h3>
+            <div class="mode-toggle">
+              <button class="mode-btn active" data-mode="code">Source</button>
+              <button class="mode-btn" data-mode="repo">Git Repo</button>
+            </div>
+          </div>
+          <div class="pane-content" id="input-container">
+            <textarea id="code-input" placeholder="// Paste your legacy source code here..."></textarea>
+          </div>
+          <div class="pane-footer" style="background: transparent; display: flex; justify-content: center; padding: 32px;">
+            <button id="btn-submit-code" class="btn btn-primary"
+              style="border-radius: 100px; height: 60px; min-width: 240px; font-weight: 700; font-size: 18px; box-shadow: 0 10px 30px var(--accent-glow);">
+              Analyze Codebase
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Side: Flashcards -->
+        <div class="dashboard-pane dashboard-right"
+          style="flex: 1; background: transparent; box-shadow: none; border: none;">
+          <div class="pane-header" style="background: transparent; border: none;">
+            <h3>Detections</h3>
+            <div id="dashboard-status" class="status-badge status-idle">System Ready</div>
+          </div>
+
+          <div class="pane-content results-scroll results-container" id="analysis-result" style="padding: 0;">
+            <div class="empty-state">
+              <div class="radar-container">
+                <div class="radar-circle"></div>
+                <div class="radar-sweep"></div>
+                <div class="radar-dot"></div>
+              </div>
+              <h3 style="margin-top: 24px; font-weight: 600; color: var(--text);">Neural Engine Ready</h3>
+              <p style="font-size: 15px; color: var(--text-muted); max-width: 280px;">Standby for deep architectural analysis and migration mapping.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FLOATING HUD -->
+      <div id="migration-summary" class="summary-dashboard" style="display: none;">
+        <div class="summary-stat">
+          <div class="stat-label">Migration Cost</div>
+          <div class="stat-value" id="total-cost">$0</div>
+        </div>
+        <div class="summary-stat">
+          <div class="stat-label">Effort Level</div>
+          <div class="stat-value" id="total-effort">None</div>
+        </div>
+        <div class="summary-stat">
+          <div class="stat-label">Files</div>
+          <div class="stat-value" id="total-files">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
+
 </html>
