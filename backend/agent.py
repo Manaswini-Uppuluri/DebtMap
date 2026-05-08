@@ -1,96 +1,68 @@
 import os
-import json
-from openai import OpenAI
-from pathlib import Path
 from dotenv import load_dotenv
+from openai import OpenAI
 
-# Load environment variables
 load_dotenv()
 
-# Groq client
-api_key = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = None
-if api_key:
-    client = OpenAI(
-        api_key=api_key,
-        base_url="https://api.groq.com/openai/v1"
-    )
 
-# Safe base directory (prevents path bugs)
-BASE_DIR = Path(__file__).resolve().parent
+if GROQ_API_KEY:
+    try:
+        client = OpenAI(api_key=GROQ_API_KEY, base_url="https://api.groq.com/openai/v1")
+    except:
+        pass
 
-def load_openclaw():
-    soul = (BASE_DIR / "SOUL.md").read_text()
-    skill = (BASE_DIR / "SKILL.md").read_text()
-    beat = (BASE_DIR / "HEARTBEAT.md").read_text()
-    return f"{soul}\n\n{skill}\n\n{beat}"
+def run_agent(data):
+    """
+    Returns specific technical advice for the detected pattern.
+    """
+    # Better Local Advice if AI is offline
+    advice_map = {
+        "openai.api_key": {
+            "explanation": "OpenAI v1.0.0+ requires a client-based approach for thread safety and multiple environment handling.",
+            "steps": ["Initialize 'client = OpenAI()'", "Remove global api_key assignments", "Pass API key to constructor"]
+        },
+        "openai.Completion.create": {
+            "explanation": "The legacy Completions API is no longer optimized. Modern models use the ChatCompletions endpoint.",
+            "steps": ["Change endpoint to 'client.chat.completions.create'", "Format input as 'messages' list", "Update response parsing logic"]
+        },
+        "os.system": {
+            "explanation": "os.system is a legacy way to run commands that doesn't capture output and is prone to shell injection.",
+            "steps": ["Import 'subprocess'", "Use 'subprocess.run' or 'subprocess.Popen'", "Properly escape arguments in a list"]
+        }
+    }
 
-def run_agent(detection_item: dict) -> dict:
-    system_prompt = load_openclaw()
-
-    user_message = f"""
-You are a migration assistant.
-
-Explain clearly WHY the API is deprecated in 1-2 sentences.
-
-Then provide exactly 3 migration steps.
-
-Then rewrite the code using the new API.
-
-old_usage: {detection_item['old_usage']}
-new_api: {detection_item['new_api']}
-reason: {detection_item['reason']}
-code_snippet: {detection_item['code_snippet']}
-
-Return ONLY valid JSON:
-{{
-  "explanation": "...",
-  "migration_steps": ["...", "...", "..."],
-  "updated_code": "..."
-}}
-"""
+    pattern = data.get("old_usage", "")
+    local_advice = advice_map.get(pattern, {
+        "explanation": f"Architectural shift required for {pattern}. This legacy pattern is deprecated and may lead to performance bottlenecks.",
+        "steps": ["Locate all references in codebase", "Replace with modern standard suggested", "Run regression tests"]
+    })
 
     if not client:
-        # Fallback to mock data if API key is missing
         return {
-            "explanation": f"The API '{detection_item['old_usage']}' is deprecated. {detection_item['reason']}",
-            "migration_steps": [
-                f"Identify usage of {detection_item['old_usage']}.",
-                f"Replace with {detection_item['new_api']} as per documentation.",
-                "Verify compatibility and run tests."
-            ],
-            "updated_code": detection_item["code_snippet"].replace(detection_item['old_usage'], detection_item['new_api'])
+            "agent_type": "Local Engine",
+            "explanation": local_advice["explanation"],
+            "steps": local_advice["steps"],
+            "is_mock": True
         }
 
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message}
-        ],
-        temperature=0.2
-    )
-
-    raw = response.choices[0].message.content.strip()
-
-    # Clean formatting
-    raw = raw.replace("```json", "").replace("```", "").strip()
-
-    # ✅ Safe JSON parsing
     try:
-        result = json.loads(raw)
-    except:
-        result = {
-            "explanation": "Parsing error",
-            "migration_steps": ["Check API docs", "Update method", "Test code"],
-            "updated_code": detection_item["code_snippet"]
+        prompt = f"Explain why {data['old_usage']} is deprecated and how to move to {data['new_api']} in 2 sentences."
+        completion = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return {
+            "agent_type": "Neural AI",
+            "explanation": completion.choices[0].message.content,
+            "steps": local_advice["steps"],
+            "is_mock": False
         }
-
-    # ✅ MEMORY UPDATE (correct place)
-    try:
-        with open(BASE_DIR / "HEARTBEAT.md", "a") as f:
-            f.write(f"\nMigrated: {detection_item['old_usage']} -> {detection_item['new_api']}")
     except:
-        pass  # don't break system if memory fails
-
-    return result
+        return {
+            "agent_type": "Local Engine Fallback",
+            "explanation": local_advice["explanation"],
+            "steps": local_advice["steps"],
+            "is_mock": True
+        }

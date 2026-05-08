@@ -425,55 +425,20 @@
           throw new Error(data.message);
         }
         const results = data.all_results || [data.scan_result];
-        const validResults = results.filter(r => r !== undefined && r !== null);
-        dashboardStatus.textContent = `${validResults.length} Issues Found`;
+        dashboardStatus.textContent = `${results.length} Issues Found`;
         dashboardStatus.className = "status-badge status-idle";
         dashboardStatus.style.color = "var(--yellow)";
 
-        // MORPH TO SEARCH BAR (SUCCESS ONLY)
-        setTimeout(() => {
-          btnSubmitCode.classList.remove('loading');
-          btnSubmitCode.classList.add('success');
-          btnSubmitCode.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>`;
-          
-          setTimeout(() => {
-            btnSubmitCode.classList.remove('success');
-            btnSubmitCode.classList.add('is-searching');
-            btnSubmitCode.innerHTML = `
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <input type="text" id="detection-filter" placeholder="Search detections..." autocomplete="off">
-            `;
-            
-            const filterInput = document.getElementById('detection-filter');
-            if (filterInput) {
-              filterInput.focus();
-              filterInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                const cards = document.querySelectorAll('.result-card');
-                cards.forEach(card => {
-                  const text = card.innerText.toLowerCase();
-                  card.style.display = text.includes(term) ? 'block' : 'none';
-                });
-              });
-            }
-          }, 1500);
-        }, 100);
-
         // CALCULATE SUMMARY METRICS
-        let totalCost = data.summary ? data.summary.total_cost : 0;
+        let totalCost = 0;
         let effortMap = { 'low': 1, 'medium': 2, 'high': 3 };
         let highestEffortValue = 0;
         let highestEffortLabel = 'Low';
         let uniqueFiles = new Set();
 
-        // Safety filter to remove any undefined/null results
-        const validResults = results.filter(r => r !== undefined && r !== null);
-
-        validResults.forEach(r => {
-          if (!data.summary) {
-            totalCost += (r.estimated_cost || 0);
-          }
-          uniqueFiles.add(r.file || "source_input");
+        results.forEach(r => {
+          totalCost += (r.estimated_cost || 0);
+          uniqueFiles.add(r.file);
           const eff = (r.effort || 'low').toLowerCase();
           if (effortMap[eff] > highestEffortValue) {
             highestEffortValue = effortMap[eff];
@@ -486,9 +451,8 @@
         summaryBox.style.display = 'flex';
 
         // Animate Numbers
-        const finalFileCount = data.summary ? data.summary.total_files : uniqueFiles.size;
         animateValue("total-cost", 0, totalCost, 1000, "$");
-        animateValue("total-files", 0, finalFileCount, 1000, "");
+        animateValue("total-files", 0, uniqueFiles.size, 1000, "");
         document.getElementById('total-effort').textContent = highestEffortLabel;
 
         analysisResult.innerHTML = ''; // Clear empty state
@@ -500,11 +464,11 @@
 
           if (scan.occurrences && scan.occurrences.length > 0) {
             const occ = scan.occurrences[0];
-            originalText = occ.original_code;
-            suggestedText = occ.suggested_code;
+            originalText = (occ.original_code || "").trim();
+            suggestedText = (occ.suggested_code || "").trim();
 
-            if (originalText) diffHtml += `<div class="diff-line removed">- ${originalText.trim()}</div>`;
-            if (suggestedText) diffHtml += `<div class="diff-line added">+ ${suggestedText.trim()}</div>`;
+            if (originalText) diffHtml += `<div class="diff-line removed">- ${originalText}</div>`;
+            if (suggestedText) diffHtml += `<div class="diff-line added">+ ${suggestedText}</div>`;
           }
 
           const card = document.createElement('div');
@@ -533,8 +497,8 @@
                 
                 <div class="action-buttons">
                   <button class="btn btn-secondary btn-apply-fix" 
-                    data-orig="${originalText.replace(/"/g, '&quot;')}" 
-                    data-sugg="${suggestedText.replace(/"/g, '&quot;')}"
+                    data-orig="${(originalText || '').replace(/"/g, '&quot;')}" 
+                    data-sugg="${(suggestedText || '').replace(/"/g, '&quot;')}"
                     data-full="${(scan.full_content || '').replace(/"/g, '&quot;')}">
                     ${currentMode === 'repo' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View in Editor' : 'Apply Fix Automatically'}
                   </button>
@@ -544,53 +508,70 @@
           analysisResult.appendChild(card);
         });
 
-        // Bind View / Fix Buttons
-        document.querySelectorAll('.btn-apply-fix').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const orig = btn.dataset.orig;
-            const sugg = btn.dataset.sugg;
-            const fullContent = btn.dataset.full;
-
-            // State: Viewing a repo file
-            if (currentMode === 'repo' && fullContent) {
-              const codeBtn = document.querySelector('.mode-btn[data-mode="code"]');
-              codeBtn.click();
-
-              setTimeout(() => {
-                const codeInputArea = document.getElementById('code-input');
-                if (codeInputArea) {
-                  codeInputArea.value = fullContent;
-                  // Transform button to Fix mode
-                  btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Apply Fix in Editor`;
-                  btn.className = "btn btn-primary btn-apply-fix";
-                  btn.dataset.full = ""; // Clear so next click applies fix
-
-                  // Visual feedback on editor
-                  codeInputArea.style.boxShadow = "inset 0 0 20px rgba(88, 166, 255, 0.2)";
-                  setTimeout(() => { codeInputArea.style.boxShadow = "none"; }, 1000);
-                }
-              }, 50);
-              return;
-            }
-
-            // State: Applying a fix
-            const codeInputArea = document.getElementById('code-input');
-            if (codeInputArea && orig && sugg) {
-              const oldCode = codeInputArea.value;
-              if (oldCode.includes(orig)) {
-                codeInputArea.value = oldCode.replace(orig, sugg);
-                btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Modernized`;
-                btn.classList.add('status-success');
-                btn.style.background = "var(--green-dim)";
-                btn.style.color = "var(--green)";
-                btn.disabled = true;
-              } else {
-                btn.textContent = "Instance not found";
-                btn.style.color = "var(--red)";
-              }
-            }
+        // Bind View / Fix Buttons (RE-INITIALIZE AFTER RENDERING)
+        const bindButtons = () => {
+          document.querySelectorAll('.btn-apply-fix').forEach(btn => {
+            btn.replaceWith(btn.cloneNode(true)); // Clear old listeners
           });
-        });
+          
+          document.querySelectorAll('.btn-apply-fix').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const orig = btn.dataset.orig;
+              const sugg = btn.dataset.sugg;
+              const fullContent = btn.dataset.full;
+              const codeInputArea = document.getElementById('code-input');
+
+              // FUNCTION: Apply the actual text replacement
+              const applyReplacement = (area) => {
+                const oldCode = area.value;
+                // Clean whitespace for matching
+                const cleanOrig = orig.trim();
+                if (oldCode.includes(cleanOrig)) {
+                   area.value = oldCode.replace(cleanOrig, sugg.trim());
+                   btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Modernized`;
+                   btn.classList.add('status-success');
+                   btn.style.background = "var(--green-dim)";
+                   btn.style.color = "var(--green)";
+                   btn.disabled = true;
+                   
+                   // Scroll to the change (approximate)
+                   const index = area.value.indexOf(sugg.trim());
+                   area.focus();
+                   area.setSelectionRange(index, index + sugg.trim().length);
+                } else {
+                   area.value = oldCode.replace(orig, sugg); // Try exact match
+                   btn.innerHTML = "Applied";
+                   btn.disabled = true;
+                }
+              };
+
+              // Mode 1: Repository File (Always allow loading if fullContent exists)
+              if (fullContent && fullContent.trim().length > 0) {
+                const codeBtn = document.querySelector('.mode-btn[data-mode="code"]');
+                if (codeBtn && currentMode !== 'code') codeBtn.click(); // Switch view if needed
+
+                setTimeout(() => {
+                  const newArea = document.getElementById('code-input');
+                  if (newArea) {
+                    // Only load content if it's different or if we are applying a fix
+                    if (newArea.value !== fullContent) {
+                        newArea.value = fullContent;
+                    }
+                    applyReplacement(newArea);
+                    newArea.style.boxShadow = "0 0 30px var(--accent-glow)";
+                    setTimeout(() => { newArea.style.boxShadow = "none"; }, 1500);
+                  }
+                }, 150);
+              } 
+              // Mode 2: Direct Editor Fix (For pasted code or already loaded files)
+              else if (codeInputArea) {
+                applyReplacement(codeInputArea);
+              }
+            });
+          });
+        };
+
+        bindButtons();
 
       } catch (err) {
         dashboardStatus.textContent = "Error";
@@ -605,9 +586,45 @@
         `;
       } finally {
         btnSubmitCode.classList.remove('loading');
-        if (!btnSubmitCode.classList.contains('is-searching')) {
-           btnSubmitCode.innerHTML = 'Analyze Codebase';
-        }
+        btnSubmitCode.classList.add('success');
+        btnSubmitCode.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>`;
+        
+        setTimeout(() => {
+          btnSubmitCode.classList.remove('success');
+          
+          // DO SOMETHING USEFUL: Turn it into a Search/Filter Bar
+          btnSubmitCode.classList.add('is-searching');
+          btnSubmitCode.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="detection-filter" placeholder="Search detections (e.g. 'escape')..." autocomplete="off">
+          `;
+          
+          const filterInput = document.getElementById('detection-filter');
+          filterInput.focus();
+          
+          filterInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.result-card');
+            cards.forEach(card => {
+              const text = card.innerText.toLowerCase();
+              if (text.includes(term)) {
+                card.style.display = 'block';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+              } else {
+                card.style.display = 'none';
+              }
+            });
+          });
+
+          // Allow clicking the icon to reset for a new scan
+          btnSubmitCode.querySelector('svg').addEventListener('click', (e) => {
+             e.stopPropagation();
+             btnSubmitCode.classList.remove('is-searching');
+             btnSubmitCode.innerHTML = 'Analyze Codebase';
+          });
+
+        }, 2000);
 
         // TRIGGER STAGGERED REVEAL
         setTimeout(() => {

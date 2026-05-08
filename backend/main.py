@@ -12,22 +12,28 @@ CORS(app)
 
 def scan_directory(directory_path):
     all_findings = []
+    print(f"DEBUG: Starting deep scan of {directory_path}")
     for root, dirs, files in os.walk(directory_path):
-        # Skip git and hidden folders
         if '.git' in dirs: dirs.remove('.git')
+        if '__pycache__' in dirs: dirs.remove('__pycache__')
         
         for file in files:
-            if file.endswith(('.py', '.js', '.ts', '.java', '.cpp', '.c', '.go')):
+            if file.endswith(('.py', '.js', '.ts', '.java', '.html', '.css')):
                 file_path = os.path.join(root, file)
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                         content = f.read()
                         findings = scan_code(content)
-                        for finding in findings:
-                            finding['file'] = os.path.relpath(file_path, directory_path)
-                            all_findings.append(finding)
+                        if findings:
+                            for finding in findings:
+                                finding['file'] = os.path.relpath(file_path, directory_path)
+                                # Crucial: Pass full content for the "View in Editor" feature
+                                finding['full_content'] = content
+                                finding['estimated_cost'] = finding.get('estimated_cost', 50)
+                                finding['effort'] = finding.get('effort', 'Medium')
+                                all_findings.append(finding)
                 except Exception as e:
-                    print(f"Could not read {file_path}: {e}")
+                    print(f"DEBUG: Failed to read {file}: {e}")
     return all_findings
 
 @app.route("/", methods=["GET"])
@@ -39,74 +45,52 @@ def analyze():
     data = request.json
     code = data.get("code", "")
     repo_url = data.get("repo_url", "")
-
-    # Create a temp directory for scanning
     temp_dir = tempfile.mkdtemp()
     
     try:
         scan_results = []
-        
         if repo_url:
-            # Step 1: Clone Repo
-            print(f"DEBUG: Starting clone of {repo_url} into {temp_dir}")
-            try:
-                # Use git.exe explicitly and handle as a shell command for Windows stability
-                result = subprocess.run(
-                    f'git clone --depth 1 "{repo_url}" "{temp_dir}"', 
-                    capture_output=True, 
-                    text=True, 
-                    shell=True
-                )
-                if result.returncode != 0:
-                    print(f"DEBUG: Git Clone Failed: {result.stderr}")
-                    return jsonify({"status": "error", "message": f"Git Clone Failed: {result.stderr}"}), 500
-                
-                print("DEBUG: Clone successful. Starting directory scan...")
-                scan_results = scan_directory(temp_dir)
-                print(f"DEBUG: Scan complete. Found {len(scan_results)} issues.")
-            except Exception as clone_err:
-                print(f"DEBUG: Subprocess Error: {clone_err}")
-                return jsonify({"status": "error", "message": f"Internal Error: {str(clone_err)}"}), 500
-        elif code:
-            # Step 1: Scan raw code
-            scan_results = scan_code(code)
-            for r in scan_results:
-                r['file'] = "source_input"
+            print(f"DEBUG: Cloning {repo_url}...")
+            subprocess.run(f'git clone --depth 1 "{repo_url}" "{temp_dir}"', shell=True, check=True, timeout=60)
+            scan_results = scan_directory(temp_dir)
         else:
-            return jsonify({"error": "No code or repo_url provided"}), 400
+            scan_results = scan_code(code)
+            for r in scan_results: 
+                r['file'] = "manual_input.py"
+                r['full_content'] = code
+                r['estimated_cost'] = r.get('estimated_cost', 50)
+                r['effort'] = r.get('effort', 'Medium')
 
         if not scan_results:
-            return jsonify({
-                "status": "no_issues",
-                "message": "No deprecated APIs found"
-            })
+            return jsonify({"status": "no_issues", "message": "No deprecated APIs detected."})
 
-        # Calculate Summary Metrics
-        total_cost = sum(r.get('estimated_cost', 0) for r in scan_results)
-        unique_files = len(set(r.get('file', 'unknown') for r in scan_results))
+        # Process results
+        detection = scan_results[0]
+        input_data = {
+            "old_usage": detection.get("api_name", "Legacy Pattern"),
+            "new_api": detection.get("replacement", "Modern Standard"),
+            "reason": detection.get("reason", "Deprecated pattern"),
+            "code_snippet": code[:500] if not repo_url else f"Found in {detection['file']}"
+        }
         
-        # Sort by cost descending
-        scan_results.sort(key=lambda x: x.get('estimated_cost', 0), reverse=True)
+        ai_result = openclaw_run(input_data)
 
         return jsonify({
             "status": "success",
+            "scan_result": detection,
             "all_results": scan_results,
-            "summary": {
-                "total_cost": total_cost,
-                "total_files": unique_files
-            }
+            "ai_result": ai_result
         })
 
     except Exception as e:
-        print(f"Error during analysis: {e}")
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        print(f"DEBUG ERROR: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
     finally:
-        # Clean up
-        if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
+        try:
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir, ignore_errors=True)
+        except:
+            pass
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
