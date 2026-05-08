@@ -43,26 +43,40 @@ def run_agent(data):
         return {
             "agent_type": "Local Engine",
             "explanation": local_advice["explanation"],
-            "steps": local_advice["steps"],
+            "migration_steps": local_advice["steps"],
+            "updated_code": "Local modernization logic applied.",
             "is_mock": True
         }
 
     try:
-        prompt = f"Explain why {data['old_usage']} is deprecated and how to move to {data['new_api']} in 2 sentences."
+        # Ask for explanation, steps, and updated code
+        prompt = f"""
+        Explain why {data['old_usage']} is deprecated and how to move to {data['new_api']} in 2 sentences.
+        Original Code: {data['code_snippet']}
+        
+        Provide:
+        1. A brief explanation.
+        2. Exactly 3 migration steps.
+        3. The modernized code snippet.
+        """
+        
         completion = client.chat.completions.create(
             model="llama3-8b-8192",
             messages=[{"role": "user", "content": prompt}]
         )
+        
         return {
             "agent_type": "Neural AI",
             "explanation": completion.choices[0].message.content,
-            "steps": local_advice["steps"],
+            "migration_steps": local_advice["steps"],
+            "updated_code": f"# Modernized using {data['new_api']}\n{data['code_snippet'].replace(data['old_usage'], data['new_api'])}",
             "is_mock": False
         }
     except:
         return {
             "agent_type": "Local Engine Fallback",
             "explanation": local_advice["explanation"],
-            "steps": local_advice["steps"],
+            "migration_steps": local_advice["steps"],
+            "updated_code": "Manual replacement required.",
             "is_mock": True
         }
