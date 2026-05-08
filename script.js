@@ -425,20 +425,55 @@
           throw new Error(data.message);
         }
         const results = data.all_results || [data.scan_result];
-        dashboardStatus.textContent = `${results.length} Issues Found`;
+        const validResults = results.filter(r => r !== undefined && r !== null);
+        dashboardStatus.textContent = `${validResults.length} Issues Found`;
         dashboardStatus.className = "status-badge status-idle";
         dashboardStatus.style.color = "var(--yellow)";
 
+        // MORPH TO SEARCH BAR (SUCCESS ONLY)
+        setTimeout(() => {
+          btnSubmitCode.classList.remove('loading');
+          btnSubmitCode.classList.add('success');
+          btnSubmitCode.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>`;
+          
+          setTimeout(() => {
+            btnSubmitCode.classList.remove('success');
+            btnSubmitCode.classList.add('is-searching');
+            btnSubmitCode.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" id="detection-filter" placeholder="Search detections..." autocomplete="off">
+            `;
+            
+            const filterInput = document.getElementById('detection-filter');
+            if (filterInput) {
+              filterInput.focus();
+              filterInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const cards = document.querySelectorAll('.result-card');
+                cards.forEach(card => {
+                  const text = card.innerText.toLowerCase();
+                  card.style.display = text.includes(term) ? 'block' : 'none';
+                });
+              });
+            }
+          }, 1500);
+        }, 100);
+
         // CALCULATE SUMMARY METRICS
-        let totalCost = 0;
+        let totalCost = data.summary ? data.summary.total_cost : 0;
         let effortMap = { 'low': 1, 'medium': 2, 'high': 3 };
         let highestEffortValue = 0;
         let highestEffortLabel = 'Low';
         let uniqueFiles = new Set();
 
-        results.forEach(r => {
-          totalCost += (r.estimated_cost || 0);
-          uniqueFiles.add(r.file);
+        // Safety filter to remove any undefined/null results
+        const validResults = results.filter(r => r !== undefined && r !== null);
+
+        validResults.forEach(r => {
+          if (!data.summary) {
+            totalCost += (r.estimated_cost || 0);
+          }
+          uniqueFiles.add(r.file || "source_input");
           const eff = (r.effort || 'low').toLowerCase();
           if (effortMap[eff] > highestEffortValue) {
             highestEffortValue = effortMap[eff];
@@ -451,8 +486,9 @@
         summaryBox.style.display = 'flex';
 
         // Animate Numbers
+        const finalFileCount = data.summary ? data.summary.total_files : uniqueFiles.size;
         animateValue("total-cost", 0, totalCost, 1000, "$");
-        animateValue("total-files", 0, uniqueFiles.size, 1000, "");
+        animateValue("total-files", 0, finalFileCount, 1000, "");
         document.getElementById('total-effort').textContent = highestEffortLabel;
 
         analysisResult.innerHTML = ''; // Clear empty state
@@ -569,45 +605,9 @@
         `;
       } finally {
         btnSubmitCode.classList.remove('loading');
-        btnSubmitCode.classList.add('success');
-        btnSubmitCode.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>`;
-        
-        setTimeout(() => {
-          btnSubmitCode.classList.remove('success');
-          
-          // DO SOMETHING USEFUL: Turn it into a Search/Filter Bar
-          btnSubmitCode.classList.add('is-searching');
-          btnSubmitCode.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="detection-filter" placeholder="Search detections (e.g. 'escape')..." autocomplete="off">
-          `;
-          
-          const filterInput = document.getElementById('detection-filter');
-          filterInput.focus();
-          
-          filterInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.result-card');
-            cards.forEach(card => {
-              const text = card.innerText.toLowerCase();
-              if (text.includes(term)) {
-                card.style.display = 'block';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-              } else {
-                card.style.display = 'none';
-              }
-            });
-          });
-
-          // Allow clicking the icon to reset for a new scan
-          btnSubmitCode.querySelector('svg').addEventListener('click', (e) => {
-             e.stopPropagation();
-             btnSubmitCode.classList.remove('is-searching');
-             btnSubmitCode.innerHTML = 'Analyze Codebase';
-          });
-
-        }, 2000);
+        if (!btnSubmitCode.classList.contains('is-searching')) {
+           btnSubmitCode.innerHTML = 'Analyze Codebase';
+        }
 
         // TRIGGER STAGGERED REVEAL
         setTimeout(() => {

@@ -8,10 +8,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Groq client
-client = OpenAI(
-    api_key=os.getenv("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1"
-)
+api_key = os.getenv("GROQ_API_KEY")
+client = None
+if api_key:
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://api.groq.com/openai/v1"
+    )
 
 # Safe base directory (prevents path bugs)
 BASE_DIR = Path(__file__).resolve().parent
@@ -46,6 +49,18 @@ Return ONLY valid JSON:
   "updated_code": "..."
 }}
 """
+
+    if not client:
+        # Fallback to mock data if API key is missing
+        return {
+            "explanation": f"The API '{detection_item['old_usage']}' is deprecated. {detection_item['reason']}",
+            "migration_steps": [
+                f"Identify usage of {detection_item['old_usage']}.",
+                f"Replace with {detection_item['new_api']} as per documentation.",
+                "Verify compatibility and run tests."
+            ],
+            "updated_code": detection_item["code_snippet"].replace(detection_item['old_usage'], detection_item['new_api'])
+        }
 
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
