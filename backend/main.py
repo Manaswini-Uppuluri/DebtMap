@@ -7,7 +7,7 @@ from flask_cors import CORS
 from openclaw_adapter import openclaw_run
 from scanner import scan_code
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='..', static_url_path='')
 CORS(app)
 
 def scan_directory(directory_path):
