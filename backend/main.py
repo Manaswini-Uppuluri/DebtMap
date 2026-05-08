@@ -36,9 +36,9 @@ def scan_directory(directory_path):
                     print(f"DEBUG: Failed to read {file}: {e}")
     return all_findings
 
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"status": "API running"})
+@app.route("/")
+def index():
+    return app.send_static_file('index.html')
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
